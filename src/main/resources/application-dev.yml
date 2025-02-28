@@ -1,0 +1,5 @@
+api-service:
+  yandex:
+    token: "yandexToken"
+  gis:
+    token: "ec5509efdf104791910183442252702"
