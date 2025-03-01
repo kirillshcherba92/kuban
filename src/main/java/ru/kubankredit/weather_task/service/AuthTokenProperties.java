@@ -6,6 +6,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AuthTokenProperties {
     private YandexServiceProperties yandex;
     private GisServiceProperties gis;
+    private YandexGeologyServiceProperties yandexGeo;
+
+    public YandexGeologyServiceProperties getYandexGeo() {
+        return yandexGeo;
+    }
+
+    public void setYandexGeo(YandexGeologyServiceProperties yandexGeo) {
+        this.yandexGeo = yandexGeo;
+    }
 
     public YandexServiceProperties getYandex() {
         return yandex;
@@ -35,7 +44,19 @@ public class AuthTokenProperties {
         }
     }
 
-    public static class GisServiceProperties{
+    public static class GisServiceProperties {
+        private String token;
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+    }
+
+    public static class YandexGeologyServiceProperties {
         private String token;
 
         public String getToken() {

@@ -2,7 +2,8 @@ package ru.kubankredit.weather_task.service;
 
 public enum Services {
     YANDEX("YANDEX"),
-    GIS("GIS");
+    GIS("GIS"),
+    ALL("ALL");
 
     private String name;
 

@@ -1,7 +1,6 @@
 package ru.kubankredit.weather_task.model;
 
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class WeatherResponseModel {

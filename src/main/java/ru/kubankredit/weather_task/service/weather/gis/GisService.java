@@ -1,4 +1,4 @@
-package ru.kubankredit.weather_task.service.gis;
+package ru.kubankredit.weather_task.service.weather.gis;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,7 +14,6 @@ import ru.kubankredit.weather_task.service.Services;
 import ru.kubankredit.weather_task.service.WeatherService;
 
 import java.util.List;
-import java.util.Locale;
 
 @Component
 @Conditional(ConditionGisService.class)

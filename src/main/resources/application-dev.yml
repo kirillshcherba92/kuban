@@ -1,5 +1,7 @@
 api-service:
   yandex:
-    token: "yandexToken"
+    token: "YNADEX_KEY"
   gis:
-    token: "ec5509efdf104791910183442252702"
+    token: "GIS_KEY"
+  yandexGeo:
+    token: "GEO_YANDEX_KEY"
