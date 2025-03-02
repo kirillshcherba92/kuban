@@ -2,6 +2,7 @@ package ru.kubankredit.weather_task.service.weather.yandex;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,7 +17,7 @@ import ru.kubankredit.weather_task.service.AuthTokenProperties;
 import ru.kubankredit.weather_task.service.MapperFactory;
 import ru.kubankredit.weather_task.service.Services;
 import ru.kubankredit.weather_task.service.WeatherService;
-import ru.kubankredit.weather_task.service.geo.GeolocationService;
+import ru.kubankredit.weather_task.service.geo.GeoService;
 
 import java.net.URI;
 import java.util.List;
@@ -38,9 +39,9 @@ public class YndexService implements WeatherService {
 
     private final RestTemplate restTemplate;
     private final MapperFactory mapperFactory;
-    private final GeolocationService geolocationService;
+    private final GeoService<String> geolocationService;
 
-    public YndexService(RestTemplate restTemplate, AuthTokenProperties authTokenProperties, MapperFactory mapperFactory, GeolocationService geolocationService) {
+    public YndexService(RestTemplate restTemplate, AuthTokenProperties authTokenProperties, MapperFactory mapperFactory, GeoService<String> geolocationService) {
         this.restTemplate = restTemplate;
         this.geolocationService = geolocationService;
         this.token = authTokenProperties.getYandex().getToken();
@@ -50,6 +51,7 @@ public class YndexService implements WeatherService {
     }
 
     @Override
+    @Cacheable(value = "currentWeatherYandex", key = "#cityName", unless = "#result == null ")
     public WeatherResponseModel getCurrentWeather(String cityName) {
         PointPos point = geolocationService.getPoint(cityName);
 

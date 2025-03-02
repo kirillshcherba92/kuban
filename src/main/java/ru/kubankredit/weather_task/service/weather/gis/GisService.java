@@ -2,11 +2,14 @@ package ru.kubankredit.weather_task.service.weather.gis;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.kubankredit.weather_task.exception.GisWeatherServiceException;
 import ru.kubankredit.weather_task.model.WeatherResponseModel;
 import ru.kubankredit.weather_task.service.AuthTokenProperties;
 import ru.kubankredit.weather_task.service.MapperFactory;
@@ -14,6 +17,8 @@ import ru.kubankredit.weather_task.service.Services;
 import ru.kubankredit.weather_task.service.WeatherService;
 
 import java.util.List;
+
+import static ru.kubankredit.weather_task.exception.ContainerOfAnswer.MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS;
 
 @Component
 @Conditional(ConditionGisService.class)
@@ -39,6 +44,7 @@ public class GisService implements WeatherService {
     }
 
     @Override
+    @Cacheable(value = "currentWeatherGis", key = "#cityName", unless = "#result == null ")
     public WeatherResponseModel getCurrentWeather(String cityName) {
         String uriForApiGis = UriComponentsBuilder.fromUriString(BASE_URL)
                 .path(CURRENT_URL_PATH)
@@ -46,12 +52,11 @@ public class GisService implements WeatherService {
                 .queryParam("q", cityName)
                 .queryParam("aqi", "no")
                 .build().toUriString();
-        ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
+        ResponseEntity<JsonNode> responseEntity = sendRequestToApiService(uriForApiGis);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
-        WeatherResponseModel weatherResponseModelGisService = mapperFactory.getMapperOfResponses()
+        return mapperFactory.getMapperOfResponses()
                 .get(serviceName)
                 .mapFrom(jsonBodyOfResponseEntity);
-        return weatherResponseModelGisService;
     }
 
     @Override
@@ -64,13 +69,22 @@ public class GisService implements WeatherService {
                 .queryParam("aqi", "no")
                 .queryParam("alerts", "no")
                 .build().toUriString();
-        ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
+        ResponseEntity<JsonNode> responseEntity = sendRequestToApiService(uriForApiGis);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
-
-        List<WeatherResponseModel> weatherResponseModelList = mapperFactory.getMapperOfListResponses()
+        return  mapperFactory.getMapperOfListResponses()
                 .get(serviceName)
                 .mapFrom(jsonBodyOfResponseEntity);
+    }
 
-        return weatherResponseModelList;
+    private ResponseEntity<JsonNode> sendRequestToApiService(String uriForApiGis) {
+        ResponseEntity<JsonNode> responseEntity = null;
+        try {
+            responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
+        } catch (HttpClientErrorException restClientException) {
+            JsonNode bodyOfRestClientException = restClientException.getResponseBodyAs(JsonNode.class);
+            String message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
+            throw new GisWeatherServiceException(message);
+        }
+        return responseEntity;
     }
 }

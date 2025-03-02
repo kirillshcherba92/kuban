@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.kubankredit.weather_task.model.PointPos;
 import ru.kubankredit.weather_task.model.WeatherResponseModel;
 import ru.kubankredit.weather_task.service.WeatherService;
+import ru.kubankredit.weather_task.service.geo.GeoService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +17,12 @@ import java.util.List;
 @RequestMapping(value = "api/v1/weather/")
 public class WeatherController {
 
+    private final GeoService<String> geoService;
+
     private final List<WeatherService> weatherServices;
 
-    public WeatherController(List<WeatherService> weatherServices) {
+    public WeatherController(GeoService<String> geoService, List<WeatherService> weatherServices) {
+        this.geoService = geoService;
         this.weatherServices = weatherServices;
     }
 
@@ -37,5 +42,10 @@ public class WeatherController {
             weatherResponseModels.add(weatherService.getWeekWeather(cityName));
         });
         return weatherResponseModels;
+    }
+
+    @GetMapping("geo")
+    public PointPos getPint(@Nullable @RequestParam("city") String cityName) {
+        return geoService.getPoint(cityName);
     }
 }
