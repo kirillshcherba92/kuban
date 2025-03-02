@@ -20,4 +20,8 @@ public final class ContainerOfAnswer {
             2008, "API-ключ был отключен.",
             2009, "Ключ API не имеет доступа к ресурсу. Пожалуйста, ознакомьтесь со страницей ценообразования, чтобы узнать, что разрешено в вашем плане подписки на API."
     );
+
+    public static final Map<String, String> MAP_OF_EXCEPTION_ANSWER_SERVICE_YANDEX = Map.of(
+            "forbidden", "Не верный токен авторизации"
+    );
 }

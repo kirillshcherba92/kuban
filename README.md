@@ -25,5 +25,5 @@ project POM contains empty overrides for these elements. If you manually switch 
 the inheritance, you need to remove those overrides.
 
 Кеширование +
-Обработка REST ошибок 
-Логирование
+Обработка REST ошибок +
+Логирование 

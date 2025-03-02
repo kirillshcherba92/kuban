@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.kubankredit.weather_task.exception.GisWeatherServiceException;
+import ru.kubankredit.weather_task.exception.WeatherServiceException;
 import ru.kubankredit.weather_task.model.WeatherResponseModel;
 import ru.kubankredit.weather_task.service.AuthTokenProperties;
 import ru.kubankredit.weather_task.service.MapperFactory;
@@ -71,7 +71,7 @@ public class GisService implements WeatherService {
                 .build().toUriString();
         ResponseEntity<JsonNode> responseEntity = sendRequestToApiService(uriForApiGis);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
-        return  mapperFactory.getMapperOfListResponses()
+        return mapperFactory.getMapperOfListResponses()
                 .get(serviceName)
                 .mapFrom(jsonBodyOfResponseEntity);
     }
@@ -83,7 +83,7 @@ public class GisService implements WeatherService {
         } catch (HttpClientErrorException restClientException) {
             JsonNode bodyOfRestClientException = restClientException.getResponseBodyAs(JsonNode.class);
             String message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
-            throw new GisWeatherServiceException(message);
+            throw new WeatherServiceException(message, serviceName);
         }
         return responseEntity;
     }
