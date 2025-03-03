@@ -1,6 +1,8 @@
 package ru.kubankredit.weather_task.service.weather.gis;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Conditional;
@@ -25,6 +27,8 @@ import static ru.kubankredit.weather_task.exception.ContainerOfAnswer.MAP_OF_EXC
 @EnableConfigurationProperties(value = AuthTokenProperties.class)
 public class GisService implements WeatherService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GisService.class);
+
     private static final String BASE_URL = "http://api.weatherapi.com/v1/";
     private static final String CURRENT_URL_PATH = "current.json";
     private static final String WEEK_URL_PATH = "forecast.json";
@@ -41,6 +45,7 @@ public class GisService implements WeatherService {
         apiToken = authTokenProperties.getGis().getToken();
         this.mapperFactory = mapperFactory;
         serviceName = Services.GIS.getName();
+        LOGGER.info("Service {} is starting", serviceName);
     }
 
     @Override
@@ -52,7 +57,9 @@ public class GisService implements WeatherService {
                 .queryParam("q", cityName)
                 .queryParam("aqi", "no")
                 .build().toUriString();
+        LOGGER.debug("Create URI is {}", uriForApiGis);
         ResponseEntity<JsonNode> responseEntity = sendRequestToApiService(uriForApiGis);
+        LOGGER.debug("responseEntity: {}", responseEntity);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
         return mapperFactory.getMapperOfResponses()
                 .get(serviceName)
@@ -69,7 +76,9 @@ public class GisService implements WeatherService {
                 .queryParam("aqi", "no")
                 .queryParam("alerts", "no")
                 .build().toUriString();
+        LOGGER.debug("Create URI is {}", uriForApiGis);
         ResponseEntity<JsonNode> responseEntity = sendRequestToApiService(uriForApiGis);
+        LOGGER.debug("responseEntity: {}", responseEntity);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
         return mapperFactory.getMapperOfListResponses()
                 .get(serviceName)
@@ -88,6 +97,7 @@ public class GisService implements WeatherService {
             } catch (final RuntimeException exception) {
                 message = exception.getMessage();
             }
+            LOGGER.error(message);
             throw new WeatherServiceException(message, serviceName);
         }
         return responseEntity;

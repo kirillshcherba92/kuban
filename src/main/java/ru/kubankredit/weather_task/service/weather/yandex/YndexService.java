@@ -3,6 +3,8 @@ package ru.kubankredit.weather_task.service.weather.yandex;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Conditional;
@@ -22,6 +24,7 @@ import ru.kubankredit.weather_task.service.MapperFactory;
 import ru.kubankredit.weather_task.service.Services;
 import ru.kubankredit.weather_task.service.WeatherService;
 import ru.kubankredit.weather_task.service.geo.GeoService;
+import ru.kubankredit.weather_task.service.weather.gis.GisService;
 
 import java.net.URI;
 import java.util.List;
@@ -33,6 +36,8 @@ import static ru.kubankredit.weather_task.exception.ContainerOfAnswer.MAP_OF_EXC
 @Conditional(ConditionYandexService.class)
 @EnableConfigurationProperties(value = AuthTokenProperties.class)
 public class YndexService implements WeatherService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(YndexService.class);
 
     private static final String BASE_URL = "http://api.weather.yandex.ru/v2/forecast";
     private static final String HEADER_TOKEN_KEY = "X-Yandex-Weather-Key";
@@ -56,6 +61,7 @@ public class YndexService implements WeatherService {
         this.mapperFactory = mapperFactory;
         serviceName = Services.YANDEX.getName();
         httpHeaders.add(HEADER_TOKEN_KEY, token);
+        LOGGER.info("Service {} is starting", serviceName);
     }
 
     @Override
@@ -70,7 +76,7 @@ public class YndexService implements WeatherService {
                 .queryParam("hours", false)
                 .queryParam("limit", 1)
                 .build().toUriString();
-
+        LOGGER.debug("Create URI is {}", uriForApiGis);
         JsonNode jsonBodyOfResponseEntity = sendRequestToApiService(uriForApiGis);
         WeatherResponseModel weatherResponseModelGisService = mapperFactory.getMapperOfResponses()
                 .get(serviceName)
@@ -90,7 +96,7 @@ public class YndexService implements WeatherService {
                 .queryParam("hours", false)
                 .queryParam("limit", 7)
                 .build().toUriString();
-
+        LOGGER.debug("Create URI is {}", uriForApiGis);
         JsonNode jsonBodyOfResponseEntity = sendRequestToApiService(uriForApiGis);
 
         return mapperFactory.getMapperOfListResponses()
@@ -106,6 +112,7 @@ public class YndexService implements WeatherService {
         ResponseEntity<JsonNode> responseEntity = null;
         try {
             responseEntity = restTemplate.exchange(requestEntity, JsonNode.class);
+            LOGGER.debug("responseEntity: {}", responseEntity);
         } catch (final HttpClientErrorException restClientException) {
             final String responseBodyAsString = restClientException.getResponseBodyAsString();
             String message = responseBodyAsString;
@@ -119,7 +126,7 @@ public class YndexService implements WeatherService {
             if (expMessageJson != null) {
                 message = MAP_OF_EXCEPTION_ANSWER_SERVICE_YANDEX.get(expMessageJson.asText());
             }
-
+            LOGGER.error(message);
             throw new WeatherServiceException(message, serviceName);
         }
         return responseEntity.getBody();

@@ -2,6 +2,8 @@ package ru.kubankredit.weather_task.service.geo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +13,8 @@ import ru.kubankredit.weather_task.service.AuthTokenProperties;
 
 @Component
 public class GeolocationService implements GeoService<String> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationService.class);
 
     private static final String URL = "https://geocode-maps.yandex.ru/1.x/";
     private static final String CITY_PREFIX = "город ";
@@ -22,6 +26,7 @@ public class GeolocationService implements GeoService<String> {
     public GeolocationService(RestTemplate restTemplate, AuthTokenProperties authTokenProperties) {
         this.restTemplate = restTemplate;
         token = authTokenProperties.getYandexGeo().getToken();
+        LOGGER.info("Service Geolocation is starting");
     }
 
     @Override
@@ -34,7 +39,9 @@ public class GeolocationService implements GeoService<String> {
                 .queryParam("result", "1")
                 .queryParam("kind", "locality")
                 .build().toUriString();
+        LOGGER.debug("Create URI is {}", uriForApiGis);
         ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
+        LOGGER.debug("responseEntity: {}", responseEntity);
         JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
 
         ArrayNode jsonNode = (ArrayNode) jsonBodyOfResponseEntity.get("response").get("GeoObjectCollection").get("featureMember");
@@ -45,6 +52,7 @@ public class GeolocationService implements GeoService<String> {
             pointPos.setLatitude(pointArray[1]);
             pointPos.setLongitude(pointArray[0]);
         });
+        LOGGER.info("Геолокация города {} получена = {}", cityName, pointPos);
         return pointPos;
     }
 }

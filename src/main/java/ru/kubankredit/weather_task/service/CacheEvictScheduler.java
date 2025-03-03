@@ -1,5 +1,7 @@
 package ru.kubankredit.weather_task.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +16,8 @@ import java.util.Set;
 @Component
 public class CacheEvictScheduler {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(CacheEvictScheduler.class);
+
     private final DateTimeFormatter dateTimeFormatterGis = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final DateTimeFormatter dateTimeFormatterYandex = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -27,12 +31,15 @@ public class CacheEvictScheduler {
     public void evictCurrentWeatherGisCache() {
         Cache currentWeather = cacheManager.getCache("currentWeatherGis");
         extracted(currentWeather, dateTimeFormatterGis);
+        LOGGER.info("Очистка кеша для хранилища \"currentWeatherGis\".");
+
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 60) // каждый час проверка
     public void evictCurrentWeatherYandexCache() {
         Cache currentWeather = cacheManager.getCache("currentWeatherYandex");
         extracted(currentWeather, dateTimeFormatterYandex);
+        LOGGER.info("Очистка кеша для хранилища \"currentWeatherYandex\".");
     }
 
     private void extracted(Cache currentWeather, DateTimeFormatter dateTimeFormatter) {

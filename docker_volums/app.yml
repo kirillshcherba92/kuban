@@ -4,8 +4,8 @@ api_weather_service: YANDEX
 
 api-service:
   yandex:
-    token: "493c44a8-be33-4168-ad38-dc1f031d9bac"
+    token: ""
   gis:
-    token: "ec5509efdf104791910183442252702"
+    token: ""
   yandexGeo:
-    token: "68c444fb-b444-4500-94a6-31888916ffb6"
+    token: ""

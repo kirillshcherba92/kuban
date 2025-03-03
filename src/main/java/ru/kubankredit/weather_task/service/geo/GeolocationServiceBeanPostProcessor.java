@@ -1,5 +1,7 @@
 package ru.kubankredit.weather_task.service.geo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class GeolocationServiceBeanPostProcessor implements BeanPostProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationServiceBeanPostProcessor.class);
+
     Map<Object, Object> pointPosMap = new ConcurrentHashMap<>();
 
     @Override
@@ -23,7 +27,9 @@ public class GeolocationServiceBeanPostProcessor implements BeanPostProcessor {
                     pointPosMap.put(args[0], invoke);
                     return invoke;
                 } else {
-                    return pointPosMap.get(args[0]);
+                    PointPos point = (PointPos)pointPosMap.get(args[0]);
+                    LOGGER.info("Геолокация города {} получена = {}", args[0], point);
+                    return point;
                 }
             });
         }

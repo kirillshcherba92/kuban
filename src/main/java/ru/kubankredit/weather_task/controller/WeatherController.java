@@ -1,5 +1,7 @@
 package ru.kubankredit.weather_task.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +19,9 @@ import java.util.List;
 @RequestMapping(value = "api/v1/weather/")
 public class WeatherController {
 
-    private final GeoService<String> geoService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(WeatherController.class);
 
+    private final GeoService<String> geoService;
     private final List<WeatherService> weatherServices;
 
     public WeatherController(GeoService<String> geoService, List<WeatherService> weatherServices) {
@@ -28,6 +31,7 @@ public class WeatherController {
 
     @GetMapping("current")
     public List<WeatherResponseModel> getCurrentWeather(@Nullable @RequestParam("city") String cityName) {
+        LOGGER.info("RestIn \"api/v1/weather/current\". Вызов контроллера для получения текущей погоды.");
         List<WeatherResponseModel> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
             weatherResponseModels.add(weatherService.getCurrentWeather(cityName));
@@ -37,6 +41,7 @@ public class WeatherController {
 
     @GetMapping("week")
     public List<List<WeatherResponseModel>> getWeekWeather(@Nullable @RequestParam("city") String cityName) {
+        LOGGER.info("RestIn \"api/v1/weather/week\". Вызов контроллера для получения погоды за неделю.");
         List<List<WeatherResponseModel>> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
             weatherResponseModels.add(weatherService.getWeekWeather(cityName));
@@ -46,6 +51,7 @@ public class WeatherController {
 
     @GetMapping("geo")
     public PointPos getPint(@Nullable @RequestParam("city") String cityName) {
+        LOGGER.info("RestIn \"api/v1/weather/geo\". Вызов контроллера для получения геолокации.");
         return geoService.getPoint(cityName);
     }
 }

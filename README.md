@@ -26,7 +26,7 @@ the inheritance, you need to remove those overrides.
 
 Кеширование +
 Обработка REST ошибок +
-Логирование
-Докер + / NGIX
+Логирование +
+Докер +
 Дока
 Тесты (JUNIT)
