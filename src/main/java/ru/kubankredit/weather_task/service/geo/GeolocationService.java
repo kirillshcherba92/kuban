@@ -12,7 +12,7 @@ import ru.kubankredit.weather_task.service.AuthTokenProperties;
 @Component
 public class GeolocationService implements GeoService<String> {
 
-    private static final String URL = "http://geocode-maps.yandex.ru/1.x/";
+    private static final String URL = "https://geocode-maps.yandex.ru/1.x/";
     private static final String CITY_PREFIX = "город ";
 
     private final RestTemplate restTemplate;

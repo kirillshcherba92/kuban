@@ -80,9 +80,14 @@ public class GisService implements WeatherService {
         ResponseEntity<JsonNode> responseEntity = null;
         try {
             responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
-        } catch (HttpClientErrorException restClientException) {
-            JsonNode bodyOfRestClientException = restClientException.getResponseBodyAs(JsonNode.class);
-            String message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
+        } catch (final HttpClientErrorException restClientException) {
+            String message = restClientException.getResponseBodyAsString();
+            final JsonNode bodyOfRestClientException = restClientException.getResponseBodyAs(JsonNode.class);
+            try {
+                message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
+            } catch (final RuntimeException exception) {
+                message = exception.getMessage();
+            }
             throw new WeatherServiceException(message, serviceName);
         }
         return responseEntity;

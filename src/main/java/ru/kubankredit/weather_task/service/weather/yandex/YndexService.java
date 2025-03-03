@@ -106,14 +106,20 @@ public class YndexService implements WeatherService {
         ResponseEntity<JsonNode> responseEntity = null;
         try {
             responseEntity = restTemplate.exchange(requestEntity, JsonNode.class);
-        } catch (HttpClientErrorException restClientException) {
+        } catch (final HttpClientErrorException restClientException) {
+            final String responseBodyAsString = restClientException.getResponseBodyAsString();
+            String message = responseBodyAsString;
             JsonNode bodyOfRestClientException = null;
             try {
-                bodyOfRestClientException = objectMapper.readTree(restClientException.getResponseBodyAsString());
+                bodyOfRestClientException = objectMapper.readTree(responseBodyAsString);
             } catch (JsonProcessingException exception) {
                 throw new WeatherServiceException(exception.getMessage(), serviceName);
             }
-            String message = MAP_OF_EXCEPTION_ANSWER_SERVICE_YANDEX.get(bodyOfRestClientException.get("message").asText());
+            JsonNode expMessageJson = bodyOfRestClientException.get("message");
+            if (expMessageJson != null) {
+                message = MAP_OF_EXCEPTION_ANSWER_SERVICE_YANDEX.get(expMessageJson.asText());
+            }
+
             throw new WeatherServiceException(message, serviceName);
         }
         return responseEntity.getBody();
