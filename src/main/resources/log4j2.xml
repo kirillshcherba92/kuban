@@ -28,7 +28,7 @@
         <Logger name="org.springframework.boot" level="INFO">
             <AppenderRef ref="STDOUT"/>
         </Logger>
-        <Logger name="ru.kubankredit.weather_task.service" level="DEBUG" additivity="false">
+        <Logger name="ru.kubankredit.weather_task.service" level="INFO" additivity="false">
             <AppenderRef ref="STDOUT"/>
         </Logger>
         <Logger name="ru.kubankredit.weather_task.controller" level="DEBUG" additivity="false">

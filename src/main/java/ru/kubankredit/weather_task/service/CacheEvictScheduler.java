@@ -16,7 +16,7 @@ import java.util.Set;
 @Component
 public class CacheEvictScheduler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CacheEvictScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheEvictScheduler.class);
 
     private final DateTimeFormatter dateTimeFormatterGis = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final DateTimeFormatter dateTimeFormatterYandex = DateTimeFormatter.ofPattern("yyyy-MM-dd");

@@ -85,6 +85,11 @@ public class GisService implements WeatherService {
                 .mapFrom(jsonBodyOfResponseEntity);
     }
 
+    @Override
+    public String getName() {
+        return serviceName;
+    }
+
     private ResponseEntity<JsonNode> sendRequestToApiService(String uriForApiGis) {
         ResponseEntity<JsonNode> responseEntity = null;
         try {
@@ -92,11 +97,14 @@ public class GisService implements WeatherService {
         } catch (final HttpClientErrorException restClientException) {
             String message = restClientException.getResponseBodyAsString();
             final JsonNode bodyOfRestClientException = restClientException.getResponseBodyAs(JsonNode.class);
-            try {
-                message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
-            } catch (final RuntimeException exception) {
-                message = exception.getMessage();
+            if (bodyOfRestClientException != null && !bodyOfRestClientException.isNull()) {
+                try {
+                    message = MAP_OF_EXCEPTION_ANSWER_SERVICE_GIS.get(bodyOfRestClientException.get("error").get("code").asInt());
+                } catch (final RuntimeException exception) {
+                    message = exception.getMessage();
+                }
             }
+
             LOGGER.error(message);
             throw new WeatherServiceException(message, serviceName);
         }

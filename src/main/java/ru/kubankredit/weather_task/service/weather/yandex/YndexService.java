@@ -24,11 +24,9 @@ import ru.kubankredit.weather_task.service.MapperFactory;
 import ru.kubankredit.weather_task.service.Services;
 import ru.kubankredit.weather_task.service.WeatherService;
 import ru.kubankredit.weather_task.service.geo.GeoService;
-import ru.kubankredit.weather_task.service.weather.gis.GisService;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.kubankredit.weather_task.exception.ContainerOfAnswer.MAP_OF_EXCEPTION_ANSWER_SERVICE_YANDEX;
 
@@ -104,11 +102,16 @@ public class YndexService implements WeatherService {
                 .mapFrom(jsonBodyOfResponseEntity)
                 .stream()
                 .peek(weatherResponseModel -> weatherResponseModel.setCityName(cityName))
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    public String getName() {
+        return serviceName;
     }
 
     private JsonNode sendRequestToApiService(String uriForApiGis) {
-        RequestEntity requestEntity = new RequestEntity(httpHeaders, HttpMethod.GET, URI.create(uriForApiGis));
+        RequestEntity<JsonNode> requestEntity = new RequestEntity<>(httpHeaders, HttpMethod.GET, URI.create(uriForApiGis));
         ResponseEntity<JsonNode> responseEntity = null;
         try {
             responseEntity = restTemplate.exchange(requestEntity, JsonNode.class);

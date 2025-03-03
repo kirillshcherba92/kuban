@@ -16,6 +16,14 @@ public class MapperFactory {
     private final String weatherGisApiSource = Services.GIS.getName();
     private final String weatherYandexApiSource = Services.YANDEX.getName();
 
+    private static final String LOCATION =  "location";
+    private static final String CURRENT =  "current";
+    private static final String CONDITION =  "condition";
+    private static final String PART =  "parts";
+    private static final String FACT =  "fact";
+    private static final String DAY =  "day";
+    private static final String FORECASTS =  "forecasts";
+
     private final Map<String, Mapper<JsonNode, WeatherResponseModel>> mapperOfResponses;
     private final Map<String, Mapper<JsonNode, List<WeatherResponseModel>>> mapperOfListResponses;
 
@@ -33,49 +41,49 @@ public class MapperFactory {
     }
 
     private Map<String, Mapper<JsonNode, WeatherResponseModel>> initMapper() {
-        final Map<String, Mapper<JsonNode, WeatherResponseModel>> mapperOfResponses = new HashMap<>();
+        final Map<String, Mapper<JsonNode, WeatherResponseModel>> includesMapperOfResponses = new HashMap<>();
 
-        mapperOfResponses.put(
+        includesMapperOfResponses.put(
                 weatherGisApiSource,
                 jsonNode -> {
                     WeatherResponseModel weatherResponseModel = new WeatherResponseModel();
-                    weatherResponseModel.setDay(jsonNode.get("location").get("localtime").asText());
-                    weatherResponseModel.setCityName(jsonNode.get("location").get("name").asText());
-                    weatherResponseModel.setTemperature(jsonNode.get("current").get("temp_c").asDouble());
+                    weatherResponseModel.setDay(jsonNode.get(LOCATION).get("localtime").asText());
+                    weatherResponseModel.setCityName(jsonNode.get(LOCATION).get("name").asText());
+                    weatherResponseModel.setTemperature(jsonNode.get(CURRENT).get("temp_c").asDouble());
                     weatherResponseModel.setSpeedOfWind(
                             BigDecimal.valueOf(
-                                    ((jsonNode.get("current").get("wind_kph").asDouble() * 1000) / 3600)
+                                    ((jsonNode.get(CURRENT).get("wind_kph").asDouble() * 1000) / 3600)
                             ).setScale(2, BigDecimal.ROUND_UP)
                                     .doubleValue()
                     );
-                    weatherResponseModel.setWeatherCharacteristic(jsonNode.get("current").get("condition").get("text").asText());
+                    weatherResponseModel.setWeatherCharacteristic(jsonNode.get(CURRENT).get(CONDITION).get("text").asText());
                     weatherResponseModel.setWeatherApiSource(weatherGisApiSource);
                     return weatherResponseModel;
                 }
         );
-        mapperOfResponses.put(
+        includesMapperOfResponses.put(
                 weatherYandexApiSource,
                 jsonNode -> {
                     WeatherResponseModel weatherResponseModel = new WeatherResponseModel();
-                    weatherResponseModel.setDay(((ArrayNode) jsonNode.get("forecasts")).get(0).get("date").asText());
-                    weatherResponseModel.setTemperature(jsonNode.get("fact").get("temp").asDouble());
-                    weatherResponseModel.setSpeedOfWind(jsonNode.get("fact").get("wind_speed").asDouble());
-                    weatherResponseModel.setWeatherCharacteristic(jsonNode.get("fact").get("condition").asText());
+                    weatherResponseModel.setDay(((ArrayNode) jsonNode.get(FORECASTS)).get(0).get("date").asText());
+                    weatherResponseModel.setTemperature(jsonNode.get(FACT).get("temp").asDouble());
+                    weatherResponseModel.setSpeedOfWind(jsonNode.get(FACT).get("wind_speed").asDouble());
+                    weatherResponseModel.setWeatherCharacteristic(jsonNode.get(FACT).get(CONDITION).asText());
                     weatherResponseModel.setWeatherApiSource(weatherYandexApiSource);
                     return weatherResponseModel;
                 }
         );
-        return mapperOfResponses;
+        return includesMapperOfResponses;
     }
 
     private Map<String, Mapper<JsonNode, List<WeatherResponseModel>>> initListMapper() {
-        final Map<String, Mapper<JsonNode, List<WeatherResponseModel>>> mapperOfListResponses = new HashMap<>();
+        final Map<String, Mapper<JsonNode, List<WeatherResponseModel>>> includesMapperOfListResponses = new HashMap<>();
 
-        mapperOfListResponses.put(
+        includesMapperOfListResponses.put(
                 weatherGisApiSource,
                 jsonNode -> {
                     List<WeatherResponseModel> weatherResponseModels = new ArrayList<>();
-                    String cityName = jsonNode.get("location").get("name").asText();
+                    String cityName = jsonNode.get(LOCATION).get("name").asText();
 
                     ArrayNode weekResponseArrayJsonNode = (ArrayNode) jsonNode.get("forecast").get("forecastday");
                     weekResponseArrayJsonNode.forEach(forecastDayNode -> {
@@ -83,32 +91,32 @@ public class MapperFactory {
                         weatherResponseModel.setCityName(cityName);
                         weatherResponseModel.setWeatherApiSource(weatherGisApiSource);
                         weatherResponseModel.setDay(forecastDayNode.get("date").asText());
-                        weatherResponseModel.setTemperature(forecastDayNode.get("day").get("avgtemp_c").asDouble());
-                        weatherResponseModel.setSpeedOfWind(forecastDayNode.get("day").get("maxwind_kph").asDouble());
-                        weatherResponseModel.setWeatherCharacteristic(forecastDayNode.get("day").get("condition").get("text").asText());
+                        weatherResponseModel.setTemperature(forecastDayNode.get(DAY).get("avgtemp_c").asDouble());
+                        weatherResponseModel.setSpeedOfWind(forecastDayNode.get(DAY).get("maxwind_kph").asDouble());
+                        weatherResponseModel.setWeatherCharacteristic(forecastDayNode.get(DAY).get(CONDITION).get("text").asText());
                         weatherResponseModels.add(weatherResponseModel);
                     });
                     return weatherResponseModels;
                 }
         );
-        mapperOfListResponses.put(
+        includesMapperOfListResponses.put(
                 weatherYandexApiSource,
                 jsonNode -> {
                     List<WeatherResponseModel> weatherResponseModels = new ArrayList<>();
 
-                    ArrayNode weekResponseArrayJsonNode = (ArrayNode) jsonNode.get("forecasts");
+                    ArrayNode weekResponseArrayJsonNode = (ArrayNode) jsonNode.get(FORECASTS);
                     weekResponseArrayJsonNode.forEach(forecastDayNode -> {
                         WeatherResponseModel weatherResponseModel = new WeatherResponseModel();
                         weatherResponseModel.setWeatherApiSource(weatherYandexApiSource);
                         weatherResponseModel.setDay(forecastDayNode.get("date").asText());
-                        weatherResponseModel.setTemperature(forecastDayNode.get("parts").get("day").get("temp_avg").asDouble());
-                        weatherResponseModel.setSpeedOfWind(forecastDayNode.get("parts").get("day").get("wind_speed").asDouble());
-                        weatherResponseModel.setWeatherCharacteristic(forecastDayNode.get("parts").get("day").get("condition").asText());
+                        weatherResponseModel.setTemperature(forecastDayNode.get(PART).get(DAY).get("temp_avg").asDouble());
+                        weatherResponseModel.setSpeedOfWind(forecastDayNode.get(PART).get(DAY).get("wind_speed").asDouble());
+                        weatherResponseModel.setWeatherCharacteristic(forecastDayNode.get(PART).get(DAY).get(CONDITION).asText());
                         weatherResponseModels.add(weatherResponseModel);
                     });
                     return weatherResponseModels;
                 }
         );
-        return mapperOfListResponses;
+        return includesMapperOfListResponses;
     }
 }

@@ -8,4 +8,6 @@ public interface WeatherService {
     WeatherResponseModel getCurrentWeather(String cityName);
 
     List<WeatherResponseModel> getWeekWeather(String cityName);
+
+    String getName();
 }

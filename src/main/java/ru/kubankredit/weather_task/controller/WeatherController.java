@@ -31,9 +31,9 @@ public class WeatherController {
 
     @GetMapping("current")
     public List<WeatherResponseModel> getCurrentWeather(@Nullable @RequestParam("city") String cityName) {
-        LOGGER.info("RestIn \"api/v1/weather/current\". Вызов контроллера для получения текущей погоды.");
         List<WeatherResponseModel> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
+            LOGGER.info("RestIn \"api/v1/weather/current\". Вызов контроллера для получения текущей погоды. Сервис: {}", weatherService.getName());
             weatherResponseModels.add(weatherService.getCurrentWeather(cityName));
         });
         return weatherResponseModels;
@@ -41,9 +41,9 @@ public class WeatherController {
 
     @GetMapping("week")
     public List<List<WeatherResponseModel>> getWeekWeather(@Nullable @RequestParam("city") String cityName) {
-        LOGGER.info("RestIn \"api/v1/weather/week\". Вызов контроллера для получения погоды за неделю.");
         List<List<WeatherResponseModel>> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
+            LOGGER.info("RestIn \"api/v1/weather/week\". Вызов контроллера для получения погоды за неделю. Сервис: {}", weatherService.getName());
             weatherResponseModels.add(weatherService.getWeekWeather(cityName));
         });
         return weatherResponseModels;

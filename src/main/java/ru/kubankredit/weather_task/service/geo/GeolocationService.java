@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.kubankredit.weather_task.exception.WeatherServiceException;
 import ru.kubankredit.weather_task.model.PointPos;
 import ru.kubankredit.weather_task.service.AuthTokenProperties;
+import ru.kubankredit.weather_task.service.Services;
 
 @Component
 public class GeolocationService implements GeoService<String> {
@@ -40,18 +42,26 @@ public class GeolocationService implements GeoService<String> {
                 .queryParam("kind", "locality")
                 .build().toUriString();
         LOGGER.debug("Create URI is {}", uriForApiGis);
-        ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
-        LOGGER.debug("responseEntity: {}", responseEntity);
-        JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
-
-        ArrayNode jsonNode = (ArrayNode) jsonBodyOfResponseEntity.get("response").get("GeoObjectCollection").get("featureMember");
         PointPos pointPos = new PointPos();
-        jsonNode.forEach(jsonNode1 -> {
-            String point = jsonNode1.get("GeoObject").get("Point").get("pos").asText();
-            String[] pointArray = point.split(" ");
-            pointPos.setLatitude(pointArray[1]);
-            pointPos.setLongitude(pointArray[0]);
-        });
+        try {
+            ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriForApiGis, JsonNode.class);
+            if(responseEntity.hasBody()) {
+                LOGGER.debug("responseEntity: {}", responseEntity);
+                JsonNode jsonBodyOfResponseEntity = responseEntity.getBody();
+                if (jsonBodyOfResponseEntity!= null && !jsonBodyOfResponseEntity.isNull()) {
+                    ArrayNode jsonNode = (ArrayNode) jsonBodyOfResponseEntity.get("response").get("GeoObjectCollection").get("featureMember");
+                    jsonNode.forEach(jsonNode1 -> {
+                        String point = jsonNode1.get("GeoObject").get("Point").get("pos").asText();
+                        String[] pointArray = point.split(" ");
+                        pointPos.setLatitude(pointArray[1]);
+                        pointPos.setLongitude(pointArray[0]);
+                    });
+                }
+            }
+        } catch (RuntimeException exception) {
+            throw new WeatherServiceException(exception.getMessage(), Services.GEO.getName());
+        }
+
         LOGGER.info("Геолокация города {} получена = {}", cityName, pointPos);
         return pointPos;
     }
