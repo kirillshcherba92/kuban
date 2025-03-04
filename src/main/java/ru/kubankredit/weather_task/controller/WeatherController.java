@@ -21,6 +21,8 @@ public class WeatherController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WeatherController.class);
 
+    private final static String DEFAULT_CITY = "Москва";
+
     private final GeoService<String> geoService;
     private final List<WeatherService> weatherServices;
 
@@ -31,27 +33,30 @@ public class WeatherController {
 
     @GetMapping("current")
     public List<WeatherResponseModel> getCurrentWeather(@Nullable @RequestParam("city") String cityName) {
+        String city = cityName == null ? DEFAULT_CITY : cityName;
         List<WeatherResponseModel> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
             LOGGER.info("RestIn \"api/v1/weather/current\". Вызов контроллера для получения текущей погоды. Сервис: {}", weatherService.getName());
-            weatherResponseModels.add(weatherService.getCurrentWeather(cityName));
+            weatherResponseModels.add(weatherService.getCurrentWeather(city));
         });
         return weatherResponseModels;
     }
 
     @GetMapping("week")
     public List<List<WeatherResponseModel>> getWeekWeather(@Nullable @RequestParam("city") String cityName) {
+        String city = cityName == null ? DEFAULT_CITY : cityName;
         List<List<WeatherResponseModel>> weatherResponseModels = new ArrayList<>();
         weatherServices.forEach(weatherService -> {
             LOGGER.info("RestIn \"api/v1/weather/week\". Вызов контроллера для получения погоды за неделю. Сервис: {}", weatherService.getName());
-            weatherResponseModels.add(weatherService.getWeekWeather(cityName));
+            weatherResponseModels.add(weatherService.getWeekWeather(city));
         });
         return weatherResponseModels;
     }
 
     @GetMapping("geo")
     public PointPos getPint(@Nullable @RequestParam("city") String cityName) {
+        String city = cityName == null ? DEFAULT_CITY : cityName;
         LOGGER.info("RestIn \"api/v1/weather/geo\". Вызов контроллера для получения геолокации.");
-        return geoService.getPoint(cityName);
+        return geoService.getPoint(city);
     }
 }

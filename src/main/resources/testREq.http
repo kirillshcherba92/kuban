@@ -1,0 +1,20 @@
+###
+GET http://localhost:8080/api/v1/weather/current?city=краснодар
+
+###
+GET http://localhost:8080/api/v1/weather/week?city=москва
+
+###
+GET http://localhost:8080/api/v1/weather/current?city=краснодар123
+
+###
+GET http://localhost:8080/api/v1/weather/week?city=краснодар123
+
+###
+GET http://localhost:8080/api/v1/weather/?city=краснодар123
+
+###
+GET http://localhost:8080/api/v1/weather/current
+
+###
+GET http://localhost:8080/api/v1/weather/week
